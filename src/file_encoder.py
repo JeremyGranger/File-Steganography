@@ -25,11 +25,11 @@ def encode_zip_in_image(image_path, zip_path, output_path):
     # Embed the zip data into the image
     flat_image_data = image_data.flatten()
     for i in range(len(zip_bin)):
-        flat_image_data[i] = (flat_image_data[i] & ~1) | int(zip_bin[i])
+        flat_image_data[i] = (flat_image_data[i] & 0xFE) | int(zip_bin[i])
 
     # Reshape the modified flat data back to the original image shape
     encoded_image_data = flat_image_data.reshape(image_data.shape)
-    encoded_image = Image.fromarray(encoded_image_data)
+    encoded_image = Image.fromarray(encoded_image_data.astype(np.uint8))
 
     # Save the encoded image
     encoded_image.save(output_path)
