@@ -1,6 +1,5 @@
 from PIL import Image
 import numpy as np
-import zipfile
 
 IMAGE_PATH = './Images/input.png'
 ZIP_PATH = './Files/input.zip'
@@ -17,15 +16,17 @@ def encode_zip_in_image(image_path, zip_path, output_path):
 
     # Convert zip data to binary string
     zip_bin = ''.join(format(byte, '08b') for byte in zip_data)
+    zip_len_bin = format(len(zip_bin), '032b')  # Store the length of the zip data
 
     # Check if the image can hold the zip data
-    if len(zip_bin) > image_data.size:
+    if len(zip_bin) + len(zip_len_bin) > image_data.size:
         raise ValueError("The image is too small to hold the zip file data.")
 
-    # Embed the zip data into the image
+    # Embed the zip length and zip data into the image
     flat_image_data = image_data.flatten()
-    for i in range(len(zip_bin)):
-        flat_image_data[i] = (flat_image_data[i] & 0xFE) | int(zip_bin[i])
+    data_to_embed = zip_len_bin + zip_bin
+    for i in range(len(data_to_embed)):
+        flat_image_data[i] = (flat_image_data[i] & 0xFE) | int(data_to_embed[i])
 
     # Reshape the modified flat data back to the original image shape
     encoded_image_data = flat_image_data.reshape(image_data.shape)
